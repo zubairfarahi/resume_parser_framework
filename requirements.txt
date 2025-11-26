@@ -1,0 +1,10 @@
+# Core dependencies for resume parser framework
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+python-magic>=0.4.27
+pypdf>=3.17.0
+python-docx>=1.0.0
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+structlog>=23.2.0
