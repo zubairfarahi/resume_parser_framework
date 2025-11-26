@@ -75,11 +75,11 @@ temp/
 docs/_build/
 site/
 
-# AI/ML
-models/
+# AI/ML (ignore ML model files, not the app/core/models directory)
 *.pkl
 *.h5
 *.onnx
+/models/
 
 # Secrets
 secrets/
