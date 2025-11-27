@@ -8,3 +8,7 @@ fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 python-multipart>=0.0.6
 structlog>=23.2.0
+
+# LLM/AI dependencies (for SkillsExtractor)
+google-generativeai>=0.3.0  # Google Gemini API
+openai>=1.0.0               # OpenAI API (optional alternative)
