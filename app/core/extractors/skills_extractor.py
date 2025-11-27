@@ -1,36 +1,40 @@
-"""Skills extractor using LLM (Google Gemini or OpenAI).
+"""Skills extractor using OpenAI LLM.
 
 This module provides a concrete implementation of FieldExtractor for extracting skills
-using Large Language Models.
+using OpenAI's Language Models.
 """
 
 import json
 import os
 from typing import Any, List, Optional
 
+from openai import OpenAI
+
 from app.config.logging_config import get_logger
 from app.core.extractors.base import FieldExtractor
 from app.exceptions.exceptions import ExtractionError
+from app.prompts.resume_extraction_prompts import generate_skills_extraction_prompt
 
 logger = get_logger(__name__)
 
 
 class SkillsExtractor(FieldExtractor):
-    """Extract skills from resume text using LLM.
+    """Extract skills from resume text using OpenAI LLM.
 
-    This extractor uses Google Gemini or OpenAI to extract skills from resume text.
-    Requires API key configuration via environment variables.
+    This extractor uses OpenAI to extract skills from resume text.
+    Requires OPENAI_API_KEY environment variable.
 
     SOLID Principles:
     - Single Responsibility: Only extracts skills
     - Liskov Substitution: Can replace FieldExtractor
     - Dependency Inversion: Depends on FieldExtractor abstraction
 
-    Strategy: LLM-based (ML/AI) extraction
+    Strategy: LLM-based (ML/AI) extraction using OpenAI
 
     Environment Variables:
-        GEMINI_API_KEY: Google Gemini API key (preferred)
-        OPENAI_API_KEY: OpenAI API key (fallback)
+        OPENAI_API_KEY: OpenAI API key (required)
+        OPENAI_MODEL: Model name (optional, default: gpt-3.5-turbo)
+        OPENAI_TEMPERATURE: Temperature for generation (optional, default: 0.0)
     """
 
     def __init__(self, config: Optional[dict] = None) -> None:
@@ -38,56 +42,21 @@ class SkillsExtractor(FieldExtractor):
 
         Args:
             config: Optional configuration dictionary with keys:
-                - provider: 'gemini' or 'openai' (default: 'gemini')
-                - model: Model name (default: 'gemini-pro' or 'gpt-3.5-turbo')
-                - temperature: Temperature for generation (default: 0.0)
+                - model: Model name (default: from env or 'gpt-3.5-turbo')
+                - temperature: Temperature for generation (default: from env or 0.0)
                 - max_tokens: Maximum tokens for response (default: 500)
         """
         super().__init__(config)
 
-        self.provider = self.config.get("provider", "gemini")
-        self.temperature = self.config.get("temperature", 0.0)
+        # Get configuration from env or config
+        self.model_name = self.config.get("model") or os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
+        self.temperature = float(
+            self.config.get("temperature") or os.getenv("OPENAI_TEMPERATURE", "0.0")
+        )
         self.max_tokens = self.config.get("max_tokens", 500)
 
-        # Initialize LLM client
-        self._initialize_llm()
-
-    def _initialize_llm(self) -> None:
-        """Initialize LLM client based on provider."""
-        if self.provider == "gemini":
-            self._initialize_gemini()
-        elif self.provider == "openai":
-            self._initialize_openai()
-        else:
-            raise ValueError(
-                f"Unsupported LLM provider: {self.provider}. Use 'gemini' or 'openai'"
-            )
-
-    def _initialize_gemini(self) -> None:
-        """Initialize Google Gemini client."""
-        api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
-            logger.error("GEMINI_API_KEY not found in environment")
-            raise ExtractionError(
-                "GEMINI_API_KEY environment variable not set",
-                field_name="skills",
-                details={"provider": "gemini"},
-            )
-
-        try:
-            import google.generativeai as genai
-
-            genai.configure(api_key=api_key)
-            self.model_name = self.config.get("model", "gemini-pro")
-            self.model = genai.GenerativeModel(self.model_name)
-            logger.info("Gemini client initialized", model=self.model_name)
-
-        except ImportError:
-            logger.error("google-generativeai package not installed")
-            raise ExtractionError(
-                "google-generativeai package not installed. Install with: pip install google-generativeai",
-                field_name="skills",
-            )
+        # Initialize OpenAI client
+        self._initialize_openai()
 
     def _initialize_openai(self) -> None:
         """Initialize OpenAI client."""
@@ -95,27 +64,28 @@ class SkillsExtractor(FieldExtractor):
         if not api_key:
             logger.error("OPENAI_API_KEY not found in environment")
             raise ExtractionError(
-                "OPENAI_API_KEY environment variable not set",
+                "OPENAI_API_KEY environment variable not set. "
+                "Please set it in your .env file or environment.",
                 field_name="skills",
-                details={"provider": "openai"},
             )
 
         try:
-            from openai import OpenAI
-
             self.client = OpenAI(api_key=api_key)
-            self.model_name = self.config.get("model", "gpt-3.5-turbo")
-            logger.info("OpenAI client initialized", model=self.model_name)
+            logger.info(
+                "OpenAI client initialized",
+                model=self.model_name,
+                temperature=self.temperature,
+            )
 
-        except ImportError:
-            logger.error("openai package not installed")
+        except Exception as e:
+            logger.error("Failed to initialize OpenAI client", error=str(e))
             raise ExtractionError(
-                "openai package not installed. Install with: pip install openai",
+                f"Failed to initialize OpenAI client: {str(e)}",
                 field_name="skills",
             )
 
     def extract(self, text: str) -> Any:
-        """Extract skills from resume text using LLM.
+        """Extract skills from resume text using OpenAI.
 
         Args:
             text: Raw resume text
@@ -134,25 +104,22 @@ class SkillsExtractor(FieldExtractor):
             raise ValueError(validation_error)
 
         logger.debug(
-            "Starting skills extraction",
+            "Starting skills extraction with OpenAI",
             text_length=len(text),
-            provider=self.provider,
+            model=self.model_name,
         )
 
-        # Create prompt for LLM
-        prompt = self._create_prompt(text)
+        # Generate prompt using structured prompts
+        prompt = generate_skills_extraction_prompt(text)
 
-        # Extract skills using LLM
+        # Extract skills using OpenAI
         try:
-            if self.provider == "gemini":
-                skills = self._extract_with_gemini(prompt)
-            else:
-                skills = self._extract_with_openai(prompt)
+            skills = self._extract_with_openai(prompt)
 
             logger.info(
                 "Skills extracted successfully",
                 skills_count=len(skills),
-                provider=self.provider,
+                model=self.model_name,
             )
 
             return skills
@@ -160,85 +127,15 @@ class SkillsExtractor(FieldExtractor):
         except Exception as e:
             logger.error(
                 "Skills extraction failed",
-                provider=self.provider,
+                model=self.model_name,
                 error=str(e),
                 exc_info=True,
             )
             raise ExtractionError(
-                f"Failed to extract skills using {self.provider}: {str(e)}",
+                f"Failed to extract skills using OpenAI: {str(e)}",
                 field_name="skills",
-                details={"provider": self.provider, "error_type": type(e).__name__},
+                details={"model": self.model_name, "error_type": type(e).__name__},
             )
-
-    def _create_prompt(self, text: str) -> str:
-        """Create prompt for LLM.
-
-        Args:
-            text: Resume text
-
-        Returns:
-            Formatted prompt string
-        """
-        # Truncate text if too long (keep first 2000 chars)
-        truncated_text = text[:2000] if len(text) > 2000 else text
-
-        prompt = f"""You are an expert technical recruiter with 10+ years of experience identifying professional skills from resumes.
-
-Analyze the following resume text and extract ALL relevant professional skills.
-
-Focus on:
-- Technical skills (programming languages, frameworks, tools, technologies)
-- Soft skills (communication, leadership, teamwork)
-- Domain expertise (machine learning, data analysis, cloud computing, etc.)
-- Certifications and qualifications
-- Methodologies (Agile, Scrum, DevOps, etc.)
-
-IMPORTANT: Return ONLY a valid JSON array of strings, with no additional text, explanations, or formatting.
-
-Example output format:
-["Python", "Machine Learning", "Docker", "Leadership", "Agile"]
-
-Resume text:
-{truncated_text}
-
-JSON array of skills:"""
-
-        return prompt
-
-    def _extract_with_gemini(self, prompt: str) -> List[str]:
-        """Extract skills using Google Gemini.
-
-        Args:
-            prompt: Formatted prompt
-
-        Returns:
-            List of skills
-
-        Raises:
-            ExtractionError: If extraction fails
-        """
-        try:
-            # Generate response
-            response = self.model.generate_content(
-                prompt,
-                generation_config={
-                    "temperature": self.temperature,
-                    "max_output_tokens": self.max_tokens,
-                },
-            )
-
-            # Parse response
-            response_text = response.text.strip()
-            logger.debug("Gemini response received", response_length=len(response_text))
-
-            # Extract JSON array from response
-            skills = self._parse_skills_response(response_text)
-
-            return skills
-
-        except Exception as e:
-            logger.error("Gemini extraction failed", error=str(e))
-            raise
 
     def _extract_with_openai(self, prompt: str) -> List[str]:
         """Extract skills using OpenAI.
@@ -271,14 +168,14 @@ JSON array of skills:"""
             return skills
 
         except Exception as e:
-            logger.error("OpenAI extraction failed", error=str(e))
+            logger.error("OpenAI API call failed", error=str(e))
             raise
 
     def _parse_skills_response(self, response_text: str) -> List[str]:
-        """Parse skills from LLM response.
+        """Parse skills from OpenAI response.
 
         Args:
-            response_text: Raw response from LLM
+            response_text: Raw response from OpenAI
 
         Returns:
             List of skills
@@ -288,7 +185,6 @@ JSON array of skills:"""
         """
         try:
             # Try to find JSON array in response
-            # Sometimes LLMs add extra text before/after the JSON
             start_idx = response_text.find("[")
             end_idx = response_text.rfind("]") + 1
 
@@ -312,9 +208,9 @@ JSON array of skills:"""
             return cleaned_skills
 
         except json.JSONDecodeError as e:
-            logger.error("Failed to parse JSON response", error=str(e), response=response_text)
+            logger.error("Failed to parse JSON response", error=str(e), response=response_text[:200])
             raise ExtractionError(
-                "LLM returned invalid JSON format",
+                "OpenAI returned invalid JSON format",
                 field_name="skills",
                 details={"response": response_text[:200]},
             )

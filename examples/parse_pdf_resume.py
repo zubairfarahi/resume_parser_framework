@@ -28,10 +28,7 @@ def main() -> None:
     extractors = {
         "name": NameExtractor(),
         "email": EmailExtractor(),
-        "skills": SkillsExtractor(config={
-            "provider": "gemini",  # or "openai"
-            "temperature": 0.0,
-        }),
+        "skills": SkillsExtractor(),  # Uses OpenAI (configure via .env)
     }
 
     # Step 2: Create the framework

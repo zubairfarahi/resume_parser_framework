@@ -97,50 +97,40 @@ class TestEmailExtractor:
 class TestSkillsExtractor:
     """Test suite for SkillsExtractor."""
 
-    def test_initialization_with_gemini(self, monkeypatch) -> None:
-        """Test initialization with Gemini provider."""
-        monkeypatch.setenv("GEMINI_API_KEY", "test-api-key")
-
-        try:
-            extractor = SkillsExtractor(config={"provider": "gemini"})
-            assert extractor.provider == "gemini"
-        except ImportError:
-            pytest.skip("google-generativeai not installed")
-
     def test_initialization_with_openai(self, monkeypatch) -> None:
-        """Test initialization with OpenAI provider."""
+        """Test initialization with OpenAI."""
         monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
 
         try:
-            extractor = SkillsExtractor(config={"provider": "openai"})
-            assert extractor.provider == "openai"
+            extractor = SkillsExtractor()
+            assert extractor.model_name == "gpt-3.5-turbo"
+            assert extractor.temperature == 0.0
         except ImportError:
             pytest.skip("openai package not installed")
 
     def test_initialization_without_api_key_fails(self, monkeypatch) -> None:
         """Test that initialization fails without API key."""
-        monkeypatch.delenv("GEMINI_API_KEY", raising=False)
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
 
         with pytest.raises(Exception):  # Should raise ExtractionError
-            SkillsExtractor(config={"provider": "gemini"})
+            SkillsExtractor()
 
     def test_get_field_name(self, monkeypatch) -> None:
         """Test get_field_name returns correct value."""
-        monkeypatch.setenv("GEMINI_API_KEY", "test-api-key")
+        monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
 
         try:
-            extractor = SkillsExtractor(config={"provider": "gemini"})
+            extractor = SkillsExtractor()
             assert extractor.get_field_name() == "skills"
         except ImportError:
-            pytest.skip("google-generativeai not installed")
+            pytest.skip("openai package not installed")
 
     def test_parse_skills_response(self, monkeypatch) -> None:
         """Test parsing skills from JSON response."""
-        monkeypatch.setenv("GEMINI_API_KEY", "test-api-key")
+        monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
 
         try:
-            extractor = SkillsExtractor(config={"provider": "gemini"})
+            extractor = SkillsExtractor()
 
             # Test with clean JSON
             response = '["Python", "JavaScript", "Docker"]'
@@ -153,4 +143,4 @@ class TestSkillsExtractor:
             assert skills == ["Python", "Java"]
 
         except ImportError:
-            pytest.skip("google-generativeai not installed")
+            pytest.skip("openai package not installed")
