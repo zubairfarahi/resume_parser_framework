@@ -4,9 +4,9 @@ This module provides a concrete implementation of FileParser for PDF files.
 """
 
 import signal
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator
 
 from pypdf import PdfReader
 

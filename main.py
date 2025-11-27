@@ -5,7 +5,6 @@ This module provides a REST API endpoint for uploading and parsing resumes.
 
 import tempfile
 from pathlib import Path
-from typing import Dict, Any
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -66,7 +65,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 
 @app.get("/")
-async def root() -> Dict[str, str]:
+async def root() -> dict[str, str]:
     """Root endpoint with API information.
 
     Returns:
@@ -84,7 +83,7 @@ async def root() -> Dict[str, str]:
 
 
 @app.get("/health")
-async def health_check() -> Dict[str, str]:
+async def health_check() -> dict[str, str]:
     """Health check endpoint.
 
     Returns:

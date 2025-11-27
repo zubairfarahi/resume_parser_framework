@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from app.core.extractors import EmailExtractor, NameExtractor, SkillsExtractor
+from app.core.extractors import EmailExtractor, NameExtractor
 from app.core.framework import ResumeParserFramework
 from app.core.models.resume_data import ResumeData
 

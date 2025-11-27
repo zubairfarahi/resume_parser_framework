@@ -4,7 +4,6 @@ This example demonstrates how to use the Resume Parser Framework to parse
 a Word (.docx) resume and extract structured information (name, email, skills).
 """
 
-from pathlib import Path
 
 from app.config.logging_config import setup_logging
 from app.core.extractors import EmailExtractor, NameExtractor, SkillsExtractor

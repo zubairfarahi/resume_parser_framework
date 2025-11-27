@@ -6,7 +6,6 @@ Follows the Open/Closed Principle - open for extension, closed for modification.
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional
 
 
 class FileParser(ABC):
@@ -60,7 +59,7 @@ class FileParser(ABC):
         """
         pass
 
-    def validate_file(self, file_path: Path) -> Optional[str]:
+    def validate_file(self, file_path: Path) -> str | None:
         """Validate that the file exists and is accessible.
 
         Args:

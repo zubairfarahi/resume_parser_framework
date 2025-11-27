@@ -4,6 +4,8 @@ This module defines the FieldExtractor ABC that all concrete extractors must imp
 Follows the Open/Closed Principle - new extractors can be added without modifying existing code.
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Any
 

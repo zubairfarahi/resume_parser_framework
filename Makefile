@@ -65,6 +65,8 @@ format:
 	black app tests examples
 	@echo "Sorting imports with isort..."
 	isort app tests examples
+	ruff check --fix .
+	ruff format .
 
 # Start the FastAPI server
 run:

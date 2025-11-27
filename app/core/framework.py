@@ -4,7 +4,6 @@ This module provides the main entry point for the resume parsing framework.
 """
 
 from pathlib import Path
-from typing import Dict
 
 from app.config.logging_config import get_logger, log_performance
 from app.core.extractors.base import FieldExtractor
@@ -52,7 +51,7 @@ class ResumeParserFramework:
 
     def __init__(
         self,
-        extractors: Dict[str, FieldExtractor],
+        extractors: dict[str, FieldExtractor],
         parser: FileParser = None,
     ) -> None:
         """Initialize the framework.
@@ -66,7 +65,7 @@ class ResumeParserFramework:
         self.parser = parser
 
         # Register default parsers
-        self._parsers: Dict[str, type[FileParser]] = {
+        self._parsers: dict[str, type[FileParser]] = {
             ".pdf": PDFParser,
             ".docx": WordParser,
             ".doc": WordParser,

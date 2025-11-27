@@ -3,7 +3,6 @@
 This module coordinates field extraction from resume text using multiple extractors.
 """
 
-from typing import Dict
 
 from app.config.logging_config import get_logger, log_performance
 from app.core.extractors.base import FieldExtractor
@@ -35,7 +34,7 @@ class ResumeExtractor:
         >>> resume_data = extractor.extract(text)
     """
 
-    def __init__(self, extractors: Dict[str, FieldExtractor]) -> None:
+    def __init__(self, extractors: dict[str, FieldExtractor]) -> None:
         """Initialize with field extractors.
 
         Args:

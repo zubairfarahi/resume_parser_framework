@@ -3,6 +3,8 @@
 This module provides a concrete implementation of FieldExtractor for extracting emails.
 """
 
+from __future__ import annotations
+
 import re
 from typing import Any
 

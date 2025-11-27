@@ -4,7 +4,7 @@ This module defines a hierarchy of exceptions for different error scenarios.
 All exceptions inherit from ResumeParserException for easy catching.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class ResumeParserException(Exception):
@@ -18,7 +18,7 @@ class ResumeParserException(Exception):
         details: Optional dictionary with additional error context
     """
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
         """Initialize the exception.
 
         Args:
@@ -56,8 +56,8 @@ class ParsingError(ResumeParserException):
     def __init__(
         self,
         message: str,
-        file_path: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
+        file_path: str | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         """Initialize the parsing error.
 
@@ -87,8 +87,8 @@ class ExtractionError(ResumeParserException):
     def __init__(
         self,
         message: str,
-        field_name: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
+        field_name: str | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         """Initialize the extraction error.
 
@@ -116,8 +116,8 @@ class ValidationError(ResumeParserException):
     def __init__(
         self,
         message: str,
-        validation_type: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
+        validation_type: str | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         """Initialize the validation error.
 
@@ -147,9 +147,9 @@ class TimeoutError(ResumeParserException):
     def __init__(
         self,
         message: str,
-        timeout_seconds: Optional[int] = None,
-        operation: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
+        timeout_seconds: int | None = None,
+        operation: str | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         """Initialize the timeout error.
 

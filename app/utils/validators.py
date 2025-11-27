@@ -5,9 +5,7 @@ Prevents common vulnerabilities like path traversal, file size attacks, and
 invalid file types.
 """
 
-import mimetypes
 from pathlib import Path
-from typing import Optional
 
 import magic
 
