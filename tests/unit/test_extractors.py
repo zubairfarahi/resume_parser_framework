@@ -1,5 +1,7 @@
 """Unit tests for field extractors."""
 
+from types import SimpleNamespace
+
 import pytest
 
 from app.core.extractors import (
@@ -10,6 +12,8 @@ from app.core.extractors import (
     PhoneExtractor,
     SkillsExtractor,
 )
+from app.core.models.resume_data import Education, WorkExperience
+from app.exceptions.exceptions import ExtractionError
 
 
 class TestNameExtractor:
@@ -272,6 +276,99 @@ class TestEducationExtractor:
         except ImportError:
             pytest.skip("openai package not installed")
 
+    def test_extract_returns_parsed_entries(self, monkeypatch) -> None:
+        """Test full extraction flow without hitting OpenAI."""
+        monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
+        monkeypatch.setattr(
+            EducationExtractor, "_initialize_openai", lambda self: setattr(self, "client", object())
+        )
+
+        sample_entries = [
+            Education(
+                institution="MIT",
+                degree="BSc",
+                field_of_study="Computer Science",
+                graduation_date="2020",
+            )
+        ]
+
+        def fake_extract(self, prompt: str):
+            assert "Resume text" in prompt
+            return sample_entries
+
+        monkeypatch.setattr(EducationExtractor, "_extract_with_openai", fake_extract)
+
+        extractor = EducationExtractor()
+        result = extractor.extract("Resume text with enough content to pass validation.")
+        assert result == sample_entries
+
+    def test_extract_handles_extraction_errors(self, monkeypatch) -> None:
+        """Test that extraction errors are wrapped in ExtractionError."""
+        monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
+        monkeypatch.setattr(
+            EducationExtractor, "_initialize_openai", lambda self: setattr(self, "client", object())
+        )
+
+        def fake_extract(self, prompt: str):
+            raise RuntimeError("LLM error")
+
+        monkeypatch.setattr(EducationExtractor, "_extract_with_openai", fake_extract)
+
+        extractor = EducationExtractor()
+        with pytest.raises(ExtractionError):
+            extractor.extract("Valid resume text for extraction.")
+
+    def test_openai_extract_flow_parses_response(self, monkeypatch) -> None:
+        """_extract_with_openai should parse client responses."""
+        monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
+        monkeypatch.setattr(EducationExtractor, "_initialize_openai", lambda self: None)
+
+        extractor = EducationExtractor()
+        payload = """[{"institution": "ABC University", "degree": "MS"}]"""
+        response = SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content=payload))]
+        )
+        extractor.client = SimpleNamespace(
+            chat=SimpleNamespace(completions=SimpleNamespace(create=lambda **kwargs: response))
+        )
+
+        result = extractor._extract_with_openai("prompt")
+        assert len(result) == 1
+        assert result[0].institution == "ABC University"
+
+    def test_openai_extract_flow_handles_errors(self, monkeypatch) -> None:
+        """_extract_with_openai should propagate client errors."""
+        monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
+        monkeypatch.setattr(EducationExtractor, "_initialize_openai", lambda self: None)
+
+        extractor = EducationExtractor()
+
+        def raise_error(**kwargs):
+            raise RuntimeError("client boom")
+
+        extractor.client = SimpleNamespace(
+            chat=SimpleNamespace(completions=SimpleNamespace(create=raise_error))
+        )
+
+        with pytest.raises(RuntimeError):
+            extractor._extract_with_openai("prompt")
+
+    def test_parse_education_response_invalid_json(self, monkeypatch) -> None:
+        """Invalid JSON should raise ExtractionError."""
+        monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
+
+        extractor = EducationExtractor()
+        with pytest.raises(ExtractionError):
+            extractor._parse_education_response("[invalid json")
+
+    def test_parse_education_response_missing_array(self, monkeypatch) -> None:
+        """Non-array responses should raise ExtractionError."""
+        monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
+
+        extractor = EducationExtractor()
+        with pytest.raises(ExtractionError):
+            extractor._parse_education_response("No brackets here")
+
 
 class TestExperienceExtractor:
     """Test suite for ExperienceExtractor."""
@@ -335,3 +432,101 @@ class TestExperienceExtractor:
 
         except ImportError:
             pytest.skip("openai package not installed")
+
+    def test_extract_returns_parsed_entries(self, monkeypatch) -> None:
+        """Test full extraction flow without hitting OpenAI."""
+        monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
+        monkeypatch.setattr(
+            ExperienceExtractor,
+            "_initialize_openai",
+            lambda self: setattr(self, "client", object()),
+        )
+
+        sample_entries = [
+            WorkExperience(
+                company="Tech Corp",
+                title="Engineer",
+                start_date="2020",
+                end_date="2022",
+                description="Did important work",
+            )
+        ]
+
+        def fake_extract(self, prompt: str):
+            assert "Resume text" in prompt
+            return sample_entries
+
+        monkeypatch.setattr(ExperienceExtractor, "_extract_with_openai", fake_extract)
+
+        extractor = ExperienceExtractor()
+        result = extractor.extract("Resume text with detailed experience information.")
+        assert result == sample_entries
+
+    def test_extract_handles_extraction_errors(self, monkeypatch) -> None:
+        """Test that extraction errors are wrapped in ExtractionError."""
+        monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
+        monkeypatch.setattr(
+            ExperienceExtractor,
+            "_initialize_openai",
+            lambda self: setattr(self, "client", object()),
+        )
+
+        def fake_extract(self, prompt: str):
+            raise RuntimeError("LLM failure")
+
+        monkeypatch.setattr(ExperienceExtractor, "_extract_with_openai", fake_extract)
+
+        extractor = ExperienceExtractor()
+        with pytest.raises(ExtractionError):
+            extractor.extract("Resume text ready for extraction.")
+
+    def test_openai_extract_flow_parses_response(self, monkeypatch) -> None:
+        """_extract_with_openai should parse client responses."""
+        monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
+        monkeypatch.setattr(ExperienceExtractor, "_initialize_openai", lambda self: None)
+
+        extractor = ExperienceExtractor()
+        payload = """[{"company": "Acme", "position": "Dev", "description": "Work"}]"""
+        response = SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content=payload))]
+        )
+        extractor.client = SimpleNamespace(
+            chat=SimpleNamespace(completions=SimpleNamespace(create=lambda **kwargs: response))
+        )
+
+        result = extractor._extract_with_openai("prompt")
+        assert len(result) == 1
+        assert result[0].company == "Acme"
+
+    def test_openai_extract_flow_handles_errors(self, monkeypatch) -> None:
+        """_extract_with_openai should propagate client errors."""
+        monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
+        monkeypatch.setattr(ExperienceExtractor, "_initialize_openai", lambda self: None)
+
+        extractor = ExperienceExtractor()
+
+        def raise_error(**kwargs):
+            raise RuntimeError("client boom")
+
+        extractor.client = SimpleNamespace(
+            chat=SimpleNamespace(completions=SimpleNamespace(create=raise_error))
+        )
+
+        with pytest.raises(RuntimeError):
+            extractor._extract_with_openai("prompt")
+
+    def test_parse_experience_response_invalid_json(self, monkeypatch) -> None:
+        """Invalid JSON should raise ExtractionError."""
+        monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
+
+        extractor = ExperienceExtractor()
+        with pytest.raises(ExtractionError):
+            extractor._parse_experience_response("[invalid json")
+
+    def test_parse_experience_response_missing_array(self, monkeypatch) -> None:
+        """Non-array responses should raise ExtractionError."""
+        monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
+
+        extractor = ExperienceExtractor()
+        with pytest.raises(ExtractionError):
+            extractor._parse_experience_response("No brackets here")
