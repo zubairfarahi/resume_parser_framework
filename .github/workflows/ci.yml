@@ -11,6 +11,9 @@ jobs:
   lint:
     name: Lint Code
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9']
 
     steps:
     - uses: actions/checkout@v4
@@ -18,7 +21,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.9'
+        python-version: ${{ matrix.python-version }}
         cache: 'pip'
 
     - name: Install dependencies
@@ -44,6 +47,9 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9']
 
     steps:
     - uses: actions/checkout@v4
@@ -51,7 +57,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.9'
+        python-version: ${{ matrix.python-version }}
         cache: 'pip'
 
     - name: Install dependencies
