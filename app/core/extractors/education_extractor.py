@@ -6,7 +6,7 @@ using OpenAI's Language Models.
 
 import json
 import os
-from typing import Any, List, Optional
+from typing import Any
 
 from openai import OpenAI
 
@@ -38,7 +38,7 @@ class EducationExtractor(FieldExtractor):
         OPENAI_TEMPERATURE: Temperature for generation (optional, default: 0.0)
     """
 
-    def __init__(self, config: Optional[dict] = None) -> None:
+    def __init__(self, config: dict | None = None) -> None:
         """Initialize the education extractor.
 
         Args:
@@ -138,7 +138,7 @@ class EducationExtractor(FieldExtractor):
                 details={"model": self.model_name, "error_type": type(e).__name__},
             )
 
-    def _extract_with_openai(self, prompt: str) -> List[Education]:
+    def _extract_with_openai(self, prompt: str) -> list[Education]:
         """Extract education using OpenAI.
 
         Args:
@@ -172,7 +172,7 @@ class EducationExtractor(FieldExtractor):
             logger.error("OpenAI API call failed", error=str(e))
             raise
 
-    def _parse_education_response(self, response_text: str) -> List[Education]:
+    def _parse_education_response(self, response_text: str) -> list[Education]:
         """Parse education from OpenAI response.
 
         Args:

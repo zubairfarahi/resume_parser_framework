@@ -6,7 +6,7 @@ using OpenAI's Language Models.
 
 import json
 import os
-from typing import Any, Optional
+from typing import Any
 
 from openai import OpenAI
 
@@ -37,7 +37,7 @@ class PhoneExtractor(FieldExtractor):
         OPENAI_TEMPERATURE: Temperature for generation (optional, default: 0.0)
     """
 
-    def __init__(self, config: Optional[dict] = None) -> None:
+    def __init__(self, config: dict | None = None) -> None:
         """Initialize the phone extractor.
 
         Args:
@@ -137,7 +137,7 @@ class PhoneExtractor(FieldExtractor):
                 details={"model": self.model_name, "error_type": type(e).__name__},
             )
 
-    def _extract_with_openai(self, prompt: str) -> Optional[str]:
+    def _extract_with_openai(self, prompt: str) -> str | None:
         """Extract phone using OpenAI.
 
         Args:
@@ -171,7 +171,7 @@ class PhoneExtractor(FieldExtractor):
             logger.error("OpenAI API call failed", error=str(e))
             raise
 
-    def _parse_phone_response(self, response_text: str) -> Optional[str]:
+    def _parse_phone_response(self, response_text: str) -> str | None:
         """Parse phone from OpenAI response.
 
         Args:

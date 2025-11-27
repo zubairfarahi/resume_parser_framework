@@ -4,7 +4,7 @@ This module provides a concrete implementation of FieldExtractor for extracting 
 """
 
 import re
-from typing import Any, Optional
+from typing import Any
 
 from app.config.logging_config import get_logger
 from app.core.extractors.base import FieldExtractor
@@ -25,7 +25,7 @@ class EmailExtractor(FieldExtractor):
     Strategy: Regex-based pattern matching
     """
 
-    def __init__(self, config: Optional[dict] = None) -> None:
+    def __init__(self, config: dict | None = None) -> None:
         """Initialize the email extractor.
 
         Args:

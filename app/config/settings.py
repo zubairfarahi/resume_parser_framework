@@ -5,7 +5,6 @@ All settings can be overridden via environment variables.
 """
 
 from pathlib import Path
-from typing import List
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -55,7 +54,7 @@ class Settings(BaseSettings):
         default=10 * 1024 * 1024,  # 10MB
         description="Maximum file size in bytes",
     )
-    allowed_mime_types: List[str] = Field(
+    allowed_mime_types: list[str] = Field(
         default=[
             "application/pdf",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

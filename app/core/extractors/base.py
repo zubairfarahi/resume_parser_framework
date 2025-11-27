@@ -5,7 +5,7 @@ Follows the Open/Closed Principle - new extractors can be added without modifyin
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class FieldExtractor(ABC):
@@ -23,7 +23,7 @@ class FieldExtractor(ABC):
     - Dependency Inversion: Depends on abstractions not concretions
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, config: dict[str, Any] | None = None) -> None:
         """Initialize the field extractor.
 
         Args:
@@ -55,7 +55,7 @@ class FieldExtractor(ABC):
         """
         pass
 
-    def validate_input(self, text: str) -> Optional[str]:
+    def validate_input(self, text: str) -> str | None:
         """Validate that the input text is suitable for extraction.
 
         Args:

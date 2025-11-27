@@ -6,7 +6,7 @@ and human-friendly console output for development.
 
 import logging
 import sys
-from typing import Any, Dict
+from typing import Any
 
 import structlog
 from structlog.types import EventDict, Processor
