@@ -71,22 +71,59 @@ make docker-logs
 
 ### Basic Usage
 
-```python
-from pathlib import Path
-from app.core.models.resume_data import ResumeData
+#### Option 1: REST API (Recommended for Testing)
 
-# Example will be added as parsers are implemented
-# For now, you can work with the ResumeData model directly
+Start the FastAPI server:
 
-resume = ResumeData(
-    name="John Doe",
-    email="john.doe@example.com",
-    phone="+1-555-123-4567",
-    skills=["Python", "FastAPI", "Docker"],
-)
+```bash
+# Install dependencies first
+pip install -r requirements.txt
 
-print(resume.to_json())
+# Configure OpenAI API key in .env
+cp .env.example .env
+# Edit .env and add your OPENAI_API_KEY
+
+# Start the server
+python main.py
+# or
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
+
+Upload and parse a resume:
+
+```bash
+# Using curl
+curl -X POST "http://localhost:8000/parse-resume" \
+     -F "file=@/path/to/resume.pdf"
+
+# Or visit the interactive docs at http://localhost:8000/docs
+```
+
+#### Option 2: Python Script
+
+```python
+from app.core.extractors import EmailExtractor, NameExtractor, SkillsExtractor
+from app.core.framework import ResumeParserFramework
+
+# Create field extractors
+extractors = {
+    "name": NameExtractor(),
+    "email": EmailExtractor(),
+    "skills": SkillsExtractor(),  # Uses OpenAI
+}
+
+# Create framework and parse
+framework = ResumeParserFramework(extractors)
+resume_data = framework.parse_resume("path/to/resume.pdf")
+
+# Display results
+print(f"Name: {resume_data.name}")
+print(f"Email: {resume_data.email}")
+print(f"Skills: {resume_data.skills}")
+print(resume_data.to_json())
+```
+
+See [examples/](examples/) directory for complete working examples.
 
 ### Configuration
 
@@ -96,24 +133,26 @@ Create a `.env` file from the example:
 cp .env.example .env
 ```
 
-Then update the values in `.env`:
+**Required Configuration:**
 
 ```bash
-# Application Settings
-RESUME_PARSER_DEBUG=false
-RESUME_PARSER_ENVIRONMENT=production
+# OpenAI API Key (REQUIRED for skills extraction)
+# Get your key from: https://platform.openai.com/api-keys
+OPENAI_API_KEY=sk-your-openai-api-key-here
+OPENAI_MODEL=gpt-3.5-turbo
+OPENAI_TEMPERATURE=0.0
+```
 
+**Optional Settings:**
+
+```bash
 # File Processing
-RESUME_PARSER_MAX_FILE_SIZE=10485760  # 10MB
-RESUME_PARSER_PARSING_TIMEOUT=30
+RESUME_PARSER_MAX_FILE_SIZE=10485760  # 10MB in bytes
+RESUME_PARSER_PARSING_TIMEOUT=30      # seconds
 
 # Logging
-RESUME_PARSER_LOG_LEVEL=INFO
-RESUME_PARSER_LOG_FORMAT=json
-
-# API Settings (if using FastAPI)
-RESUME_PARSER_API_HOST=0.0.0.0
-RESUME_PARSER_API_PORT=8000
+RESUME_PARSER_LOG_LEVEL=INFO          # DEBUG, INFO, WARNING, ERROR, CRITICAL
+RESUME_PARSER_LOG_FORMAT=console      # console or json
 ```
 
 See [.env.example](.env.example) for all available configuration options.
