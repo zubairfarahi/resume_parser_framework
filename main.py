@@ -13,7 +13,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.config.logging_config import get_logger, setup_logging
-from app.core.extractors import EmailExtractor, NameExtractor, SkillsExtractor
+from app.core.extractors import (
+    EducationExtractor,
+    EmailExtractor,
+    ExperienceExtractor,
+    NameExtractor,
+    PhoneExtractor,
+    SkillsExtractor,
+)
 from app.core.framework import ResumeParserFramework
 from app.exceptions.exceptions import ParsingError, ValidationError
 
@@ -46,7 +53,10 @@ app.add_middleware(
 extractors = {
     "name": NameExtractor(),
     "email": EmailExtractor(),
+    "phone": PhoneExtractor(),  # Uses OpenAI (configure via .env)
     "skills": SkillsExtractor(),  # Uses OpenAI (configure via .env)
+    "education": EducationExtractor(),  # Uses OpenAI (configure via .env)
+    "experience": ExperienceExtractor(),  # Uses OpenAI (configure via .env)
 }
 framework = ResumeParserFramework(extractors)
 
@@ -90,7 +100,10 @@ async def parse_resume(file: UploadFile = File(...)) -> JSONResponse:
     This endpoint accepts PDF or Word (.docx) resume files and extracts:
     - Name
     - Email
+    - Phone (using OpenAI LLM)
     - Skills (using OpenAI LLM)
+    - Education (using OpenAI LLM)
+    - Experience (using OpenAI LLM)
 
     Args:
         file: Uploaded resume file (PDF or Word)
@@ -114,7 +127,10 @@ async def parse_resume(file: UploadFile = File(...)) -> JSONResponse:
             "data": {
                 "name": "John Doe",
                 "email": "john.doe@example.com",
-                "skills": ["Python", "FastAPI", "Machine Learning"]
+                "phone": "+1 (555) 123-4567",
+                "skills": ["Python", "FastAPI", "Machine Learning"],
+                "education": [...],
+                "experience": [...]
             },
             "filename": "resume.pdf"
         }
