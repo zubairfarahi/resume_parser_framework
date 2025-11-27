@@ -5,7 +5,6 @@ standard output format for all resume parsing operations.
 """
 
 from datetime import datetime
-from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
@@ -13,22 +12,22 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 class WorkExperience(BaseModel):
     """Work experience entry."""
 
-    company: Optional[str] = None
-    title: Optional[str] = None
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
-    description: Optional[str] = None
-    responsibilities: List[str] = Field(default_factory=list)
+    company: str | None = None
+    title: str | None = None
+    start_date: str | None = None
+    end_date: str | None = None
+    description: str | None = None
+    responsibilities: list[str] = Field(default_factory=list)
 
 
 class Education(BaseModel):
     """Education entry."""
 
-    institution: Optional[str] = None
-    degree: Optional[str] = None
-    field_of_study: Optional[str] = None
-    graduation_date: Optional[str] = None
-    gpa: Optional[str] = None
+    institution: str | None = None
+    degree: str | None = None
+    field_of_study: str | None = None
+    graduation_date: str | None = None
+    gpa: str | None = None
 
 
 class ResumeData(BaseModel):
@@ -61,31 +60,31 @@ class ResumeData(BaseModel):
         parsed_at: Timestamp when resume was parsed
     """
 
-    name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    location: Optional[str] = None
-    summary: Optional[str] = None
+    name: str | None = None
+    email: EmailStr | None = None
+    phone: str | None = None
+    location: str | None = None
+    summary: str | None = None
 
-    skills: List[str] = Field(default_factory=list, description="Technical and soft skills")
-    experience: List[WorkExperience] = Field(
+    skills: list[str] = Field(default_factory=list, description="Technical and soft skills")
+    experience: list[WorkExperience] = Field(
         default_factory=list, description="Work experience history"
     )
-    education: List[Education] = Field(default_factory=list, description="Educational background")
-    certifications: List[str] = Field(
+    education: list[Education] = Field(default_factory=list, description="Educational background")
+    certifications: list[str] = Field(
         default_factory=list, description="Professional certifications"
     )
-    languages: List[str] = Field(default_factory=list, description="Spoken/written languages")
+    languages: list[str] = Field(default_factory=list, description="Spoken/written languages")
 
-    linkedin_url: Optional[str] = None
-    github_url: Optional[str] = None
-    website_url: Optional[str] = None
+    linkedin_url: str | None = None
+    github_url: str | None = None
+    website_url: str | None = None
 
     parsed_at: datetime = Field(default_factory=datetime.now, description="Parsing timestamp")
 
     @field_validator("phone")
     @classmethod
-    def validate_phone(cls, v: Optional[str]) -> Optional[str]:
+    def validate_phone(cls, v: str | None) -> str | None:
         """Validate and clean phone number.
 
         Args:
@@ -109,7 +108,7 @@ class ResumeData(BaseModel):
 
     @field_validator("skills")
     @classmethod
-    def validate_skills(cls, v: List[str]) -> List[str]:
+    def validate_skills(cls, v: list[str]) -> list[str]:
         """Validate and clean skills list.
 
         Args:
