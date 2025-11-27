@@ -21,7 +21,9 @@ class TestResumeParserFramework:
         }
         return ResumeParserFramework(extractors)
 
-    def test_framework_initialization(self, framework_with_regex_only: ResumeParserFramework) -> None:
+    def test_framework_initialization(
+        self, framework_with_regex_only: ResumeParserFramework
+    ) -> None:
         """Test framework initializes correctly."""
         assert framework_with_regex_only is not None
         assert framework_with_regex_only.resume_extractor is not None

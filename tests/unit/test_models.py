@@ -49,9 +49,7 @@ class TestResumeData:
 
     def test_skills_deduplication(self) -> None:
         """Test that duplicate skills are removed."""
-        resume = ResumeData(
-            skills=["Python", "python", "PYTHON", "Java", "Python"]
-        )
+        resume = ResumeData(skills=["Python", "python", "PYTHON", "Java", "Python"])
 
         # Should have only 2 unique skills (Python and Java)
         assert len(resume.skills) == 2

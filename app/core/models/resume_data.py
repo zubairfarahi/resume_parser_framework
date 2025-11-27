@@ -72,7 +72,9 @@ class ResumeData(BaseModel):
         default_factory=list, description="Work experience history"
     )
     education: List[Education] = Field(default_factory=list, description="Educational background")
-    certifications: List[str] = Field(default_factory=list, description="Professional certifications")
+    certifications: List[str] = Field(
+        default_factory=list, description="Professional certifications"
+    )
     languages: List[str] = Field(default_factory=list, description="Spoken/written languages")
 
     linkedin_url: Optional[str] = None

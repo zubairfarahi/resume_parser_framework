@@ -208,7 +208,9 @@ class SkillsExtractor(FieldExtractor):
             return cleaned_skills
 
         except json.JSONDecodeError as e:
-            logger.error("Failed to parse JSON response", error=str(e), response=response_text[:200])
+            logger.error(
+                "Failed to parse JSON response", error=str(e), response=response_text[:200]
+            )
             raise ExtractionError(
                 "OpenAI returned invalid JSON format",
                 field_name="skills",

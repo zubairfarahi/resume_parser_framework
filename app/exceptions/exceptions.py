@@ -18,9 +18,7 @@ class ResumeParserException(Exception):
         details: Optional dictionary with additional error context
     """
 
-    def __init__(
-        self, message: str, details: Optional[Dict[str, Any]] = None
-    ) -> None:
+    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None) -> None:
         """Initialize the exception.
 
         Args:

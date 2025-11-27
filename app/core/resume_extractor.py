@@ -107,9 +107,7 @@ class ResumeExtractor:
 
         logger.info(
             "Field extraction completed",
-            fields_extracted=sum(
-                1 for v in extracted_fields.values() if v is not None
-            ),
+            fields_extracted=sum(1 for v in extracted_fields.values() if v is not None),
             total_fields=len(extracted_fields),
         )
 

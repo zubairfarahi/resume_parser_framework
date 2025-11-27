@@ -193,9 +193,7 @@ class FileValidator:
         safe_name = filename.replace("/", "_").replace("\\", "_")
 
         # Remove other potentially dangerous characters
-        safe_name = "".join(
-            c if c.isalnum() or c in "._- " else "_" for c in safe_name
-        )
+        safe_name = "".join(c if c.isalnum() or c in "._- " else "_" for c in safe_name)
 
         # Replace spaces with underscores
         safe_name = safe_name.replace(" ", "_")

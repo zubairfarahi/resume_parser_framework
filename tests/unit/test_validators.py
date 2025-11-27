@@ -23,16 +23,12 @@ class TestFileValidator:
 
         assert exc_info.value.details["validation_type"] == "path"
 
-    def test_validate_file_size_within_limit(
-        self, sample_pdf_path: Path, test_settings
-    ) -> None:
+    def test_validate_file_size_within_limit(self, sample_pdf_path: Path, test_settings) -> None:
         """Test file size validation within limits."""
         # Should not raise any exception
         FileValidator.validate_file_size(sample_pdf_path)
 
-    def test_validate_file_size_exceeds_limit(
-        self, temp_directory: Path, monkeypatch
-    ) -> None:
+    def test_validate_file_size_exceeds_limit(self, temp_directory: Path, monkeypatch) -> None:
         """Test file size validation when exceeding limit."""
         # Create a file larger than the test limit
         large_file = temp_directory / "large_file.pdf"

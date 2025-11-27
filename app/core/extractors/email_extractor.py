@@ -34,9 +34,7 @@ class EmailExtractor(FieldExtractor):
         super().__init__(config)
 
         # RFC 5322 compliant email pattern (simplified)
-        self.email_pattern = re.compile(
-            r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
-        )
+        self.email_pattern = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b")
 
     def extract(self, text: str) -> Any:
         """Extract email from resume text.
