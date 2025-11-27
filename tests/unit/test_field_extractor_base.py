@@ -16,9 +16,7 @@ class DummyExtractor(FieldExtractor):
 def test_validate_input_empty_string() -> None:
     """Empty input should return validation error."""
     extractor = DummyExtractor()
-    assert extractor.validate_input("") == (
-        "Input text is empty or contains only whitespace"
-    )
+    assert extractor.validate_input("") == ("Input text is empty or contains only whitespace")
 
 
 def test_validate_input_too_short() -> None:
