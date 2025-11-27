@@ -3,7 +3,6 @@
 This module coordinates field extraction from resume text using multiple extractors.
 """
 
-
 from app.config.logging_config import get_logger, log_performance
 from app.core.extractors.base import FieldExtractor
 from app.core.models.resume_data import ResumeData

@@ -100,6 +100,7 @@ ignore = [
     "S104",  # Binding to all interfaces (intentional for API server)
     "B904",  # Exception chaining (too verbose for this project)
     "C901",  # Complex functions (acceptable for extractors)
+    "N818",  # Exception naming (using Exception suffix is acceptable)
 ]
 
 [tool.ruff.lint.per-file-ignores]
