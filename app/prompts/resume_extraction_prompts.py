@@ -1,7 +1,6 @@
 """Resume extraction prompts for OpenAI LLM.
 
-This module contains structured prompts for extracting information from resumes,
-following the pattern from building-data-extractor.
+This module contains structured prompts for extracting information from resumes.
 """
 
 # Role definition for the LLM
