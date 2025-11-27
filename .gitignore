@@ -86,3 +86,8 @@ secrets/
 *.key
 *.pem
 credentials.json
+
+# Development files (not required for assignment)
+.claude/
+.github/
+CLAUDE.md
