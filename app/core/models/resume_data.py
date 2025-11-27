@@ -7,7 +7,7 @@ standard output format for all resume parsing operations.
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class WorkExperience(BaseModel):
@@ -148,10 +148,8 @@ class ResumeData(BaseModel):
         """
         return self.model_dump_json(indent=2)
 
-    class Config:
-        """Pydantic model configuration."""
-
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "name": "John Doe",
                 "email": "john.doe@example.com",
@@ -187,3 +185,4 @@ class ResumeData(BaseModel):
                 "github_url": "https://github.com/johndoe",
             }
         }
+    )

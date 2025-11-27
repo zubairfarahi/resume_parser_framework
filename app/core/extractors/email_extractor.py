@@ -86,14 +86,6 @@ class EmailExtractor(FieldExtractor):
         if len(email) < 6 or len(email) > 254:
             return False
 
-        # Check for common invalid patterns
-        invalid_domains = ["example.com", "test.com", "domain.com"]
-        email_lower = email.lower()
-
-        for domain in invalid_domains:
-            if domain in email_lower:
-                return False
-
         # Must have exactly one @
         if email.count("@") != 1:
             return False
