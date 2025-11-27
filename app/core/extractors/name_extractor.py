@@ -66,35 +66,40 @@ class NameExtractor(FieldExtractor):
 
         # Clean text: get first few lines where name is likely to be
         lines = text.strip().split("\n")
-        search_text = "\n".join(lines[:10])  # Search in first 10 lines
 
-        # Try each pattern
-        for i, pattern in enumerate(self.patterns, start=1):
-            match = re.search(pattern, search_text, re.MULTILINE)
-            if match:
-                name = match.group(1).strip()
+        # Search first 3 lines individually to avoid matching across lines
+        for line in lines[:3]:
+            if not line.strip():
+                continue
 
-                # Validate extracted name
-                if self._is_valid_name(name):
-                    logger.info(
-                        "Name extracted successfully",
-                        name=name,
-                        pattern_index=i,
-                    )
-                    return name
+            # Try each pattern on this line
+            for i, pattern in enumerate(self.patterns, start=1):
+                match = re.search(pattern, line, re.MULTILINE)
+                if match:
+                    name = match.group(1).strip()
 
-        # Fallback: Try to find any capitalized words at the start
-        words = search_text.split()
-        capitalized_words = []
-        for word in words[:5]:  # Check first 5 words
-            if word and word[0].isupper() and word.isalpha():
-                capitalized_words.append(word)
-                if len(capitalized_words) == 2:  # Assume 2-word name
-                    name = " ".join(capitalized_words)
+                    # Validate extracted name
                     if self._is_valid_name(name):
-                        logger.info("Name extracted via fallback", name=name)
+                        logger.info(
+                            "Name extracted successfully",
+                            name=name,
+                            pattern_index=i,
+                        )
                         return name
-                    break
+
+        # Fallback: Try to find any capitalized words at the start of first line
+        if lines:
+            words = lines[0].split()
+            capitalized_words = []
+            for word in words[:5]:  # Check first 5 words
+                if word and word[0].isupper() and word.isalpha():
+                    capitalized_words.append(word)
+                    if len(capitalized_words) == 2:  # Assume 2-word name
+                        name = " ".join(capitalized_words)
+                        if self._is_valid_name(name):
+                            logger.info("Name extracted via fallback", name=name)
+                            return name
+                        break
 
         logger.warning("No name found in text")
         return None
