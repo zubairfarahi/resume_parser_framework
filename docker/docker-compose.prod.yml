@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # Production application service
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: resume-parser-app-prod
+    image: resume-parser:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../logs:/app/logs
+      - ../uploads:/app/uploads
+    environment:
+      # Application settings
+      - RESUME_PARSER_ENVIRONMENT=production
+      - RESUME_PARSER_DEBUG=false
+      - RESUME_PARSER_LOG_LEVEL=INFO
+      - RESUME_PARSER_LOG_FORMAT=json
+
+      # File processing
+      - RESUME_PARSER_MAX_FILE_SIZE=10485760
+      - RESUME_PARSER_PARSING_TIMEOUT=30
+
+      # API settings
+      - RESUME_PARSER_API_HOST=0.0.0.0
+      - RESUME_PARSER_API_PORT=8000
+      - RESUME_PARSER_API_KEY_ENABLED=true
+      - RESUME_PARSER_API_KEY=${RESUME_PARSER_API_KEY}
+    networks:
+      - resume-parser-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: resume-parser-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - resume-parser-network
+    restart: always
+
+networks:
+  resume-parser-network:
+    driver: bridge

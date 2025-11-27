@@ -17,6 +17,22 @@ A production-ready, pluggable Python framework for parsing resumes from PDF and 
 
 ### Installation
 
+#### Option 1: Using Make (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/resume-parser-framework.git
+cd resume-parser-framework
+
+# Complete setup (installs dependencies, creates directories, copies .env)
+make setup
+
+# Or install dependencies only
+make install-dev
+```
+
+#### Option 2: Manual Installation
+
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/resume-parser-framework.git
@@ -31,6 +47,26 @@ pip install -r requirements.txt
 
 # Install development dependencies (for testing and linting)
 pip install -r requirements-dev.txt
+
+# Copy environment file
+cp .env.example .env
+```
+
+#### Option 3: Using Docker
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/resume-parser-framework.git
+cd resume-parser-framework
+
+# Start with Docker Compose (development)
+docker-compose -f docker/docker-compose.yml up -d
+
+# Or use Make
+make docker-up
+
+# View logs
+make docker-logs
 ```
 
 ### Basic Usage
@@ -54,7 +90,13 @@ print(resume.to_json())
 
 ### Configuration
 
-Create a `.env` file in the project root:
+Create a `.env` file from the example:
+
+```bash
+cp .env.example .env
+```
+
+Then update the values in `.env`:
 
 ```bash
 # Application Settings
@@ -73,6 +115,8 @@ RESUME_PARSER_LOG_FORMAT=json
 RESUME_PARSER_API_HOST=0.0.0.0
 RESUME_PARSER_API_PORT=8000
 ```
+
+See [.env.example](.env.example) for all available configuration options.
 
 ## Architecture
 
@@ -136,39 +180,66 @@ This framework strictly adheres to SOLID principles:
 
 ## Development
 
+### Makefile Commands
+
+The project includes a comprehensive Makefile with common development tasks:
+
+```bash
+# Show all available commands
+make help
+
+# Setup development environment
+make setup
+
+# Run tests
+make test                  # All tests
+make test-unit            # Unit tests only
+make test-integration     # Integration tests only
+make coverage             # Tests with coverage report
+
+# Code quality
+make format               # Format with Black and isort
+make lint                 # Lint with Ruff
+make type-check          # Type check with MyPy
+make quality             # Run all quality checks
+make ci                  # Simulate CI pipeline locally
+
+# Cleaning
+make clean               # Remove generated files and caches
+
+# Security
+make security-check      # Check for vulnerabilities
+```
+
 ### Running Tests
 
 ```bash
-# Run all tests
+# Using Make (recommended)
+make test
+make coverage
+make test-unit
+
+# Direct pytest commands
 pytest
-
-# Run with coverage
 pytest --cov=app --cov-report=html
-
-# Run specific test file
 pytest tests/unit/test_models.py -v
-
-# Run tests matching pattern
 pytest -k "test_validate" -v
 ```
 
 ### Code Quality
 
 ```bash
-# Format code with Black
+# Using Make (recommended)
+make quality              # Run all quality checks
+make format              # Format code
+make lint                # Run linter
+make type-check          # Type checking
+
+# Direct commands
 black .
-
-# Sort imports with isort
 isort .
-
-# Lint with Ruff
 ruff check .
-
-# Type check with MyPy
 mypy app/
-
-# Run all quality checks
-black . && isort . && ruff check . && mypy app/
 ```
 
 ### Git Workflow
@@ -214,6 +285,53 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 - `refactor:` Code refactoring
 - `perf:` Performance improvements
 - `chore:` Maintenance tasks
+
+## Docker Usage
+
+### Development with Docker
+
+```bash
+# Build development image
+make docker-build-dev
+
+# Start containers
+make docker-up
+
+# View logs
+make docker-logs
+
+# Access container shell
+make docker-shell
+
+# Run tests in container
+make docker-test
+
+# Stop containers
+make docker-down
+
+# Clean up Docker resources
+make docker-clean
+```
+
+### Production with Docker
+
+```bash
+# Build production image
+make docker-build
+
+# Run with production compose file
+docker-compose -f docker/docker-compose.prod.yml up -d
+
+# View logs
+docker-compose -f docker/docker-compose.prod.yml logs -f
+```
+
+### Docker Architecture
+
+- **Dockerfile**: Multi-stage production build for minimal image size
+- **Dockerfile.dev**: Development build with hot reload and dev tools
+- **docker-compose.yml**: Development environment with volume mounts
+- **docker-compose.prod.yml**: Production environment with resource limits
 
 ## Testing Requirements
 
