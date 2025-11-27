@@ -47,13 +47,14 @@ class TestResumeParserFramework:
 
         assert framework.extractors == {}
 
-    @patch("app.core.framework.ParserFactory.get_parser")
-    def test_parse_resume_pdf(self, mock_get_parser):
+    @patch("app.utils.validators.FileValidator.validate_file")
+    @patch("app.core.framework.PDFParser")
+    def test_parse_resume_pdf(self, mock_pdf_parser_class, mock_validate):
         """Test parsing a PDF resume."""
-        # Mock parser
+        # Mock parser instance
         mock_parser = Mock()
         mock_parser.parse.return_value = "Sample resume text"
-        mock_get_parser.return_value = mock_parser
+        mock_pdf_parser_class.return_value = mock_parser
 
         # Mock extractors
         extractors = {
@@ -64,8 +65,11 @@ class TestResumeParserFramework:
         framework = ResumeParserFramework(extractors)
         result = framework.parse_resume(Path("/fake/resume.pdf"))
 
-        # Verify parser was called
-        mock_get_parser.assert_called_once_with(Path("/fake/resume.pdf"))
+        # Verify validation was called
+        mock_validate.assert_called_once()
+
+        # Verify parser was instantiated and called
+        mock_pdf_parser_class.assert_called_once()
         mock_parser.parse.assert_called_once()
 
         # Verify result
@@ -73,13 +77,14 @@ class TestResumeParserFramework:
         assert result.name == "John Doe"
         assert result.email == "john@example.com"
 
-    @patch("app.core.framework.ParserFactory.get_parser")
-    def test_parse_resume_docx(self, mock_get_parser):
+    @patch("app.utils.validators.FileValidator.validate_file")
+    @patch("app.core.framework.WordParser")
+    def test_parse_resume_docx(self, mock_word_parser_class, mock_validate):
         """Test parsing a Word document resume."""
-        # Mock parser
+        # Mock parser instance
         mock_parser = Mock()
         mock_parser.parse.return_value = "Sample resume text from Word"
-        mock_get_parser.return_value = mock_parser
+        mock_word_parser_class.return_value = mock_parser
 
         # Mock extractors
         extractors = {
@@ -93,12 +98,14 @@ class TestResumeParserFramework:
         assert isinstance(result, ResumeData)
         assert result.name == "Jane Smith"
 
-    @patch("app.core.framework.ParserFactory.get_parser")
-    def test_parse_resume_with_missing_fields(self, mock_get_parser):
+    @patch("app.utils.validators.FileValidator.validate_file")
+    @patch("app.core.framework.PDFParser")
+    def test_parse_resume_with_missing_fields(self, mock_pdf_parser_class, mock_validate):
         """Test parsing resume when some fields are not extracted."""
+        # Mock parser instance
         mock_parser = Mock()
         mock_parser.parse.return_value = "Limited resume text"
-        mock_get_parser.return_value = mock_parser
+        mock_pdf_parser_class.return_value = mock_parser
 
         # Only extract name, email will be None
         extractors = {
@@ -112,12 +119,14 @@ class TestResumeParserFramework:
         assert result.name == "Test User"
         assert result.email is None
 
-    @patch("app.core.framework.ParserFactory.get_parser")
-    def test_parse_resume_extractor_exception_handled(self, mock_get_parser):
+    @patch("app.utils.validators.FileValidator.validate_file")
+    @patch("app.core.framework.PDFParser")
+    def test_parse_resume_extractor_exception_handled(self, mock_pdf_parser_class, mock_validate):
         """Test that extractor exceptions are handled gracefully."""
+        # Mock parser instance
         mock_parser = Mock()
         mock_parser.parse.return_value = "Resume text"
-        mock_get_parser.return_value = mock_parser
+        mock_pdf_parser_class.return_value = mock_parser
 
         # Mock extractor that raises exception
         failing_extractor = Mock(spec=FieldExtractor)
@@ -139,12 +148,14 @@ class TestResumeParserFramework:
         assert result.name is None  # Failed extraction
         assert result.email == "test@example.com"  # Successful extraction
 
-    @patch("app.core.framework.ParserFactory.get_parser")
-    def test_parse_resume_parser_fails(self, mock_get_parser):
+    @patch("app.utils.validators.FileValidator.validate_file")
+    @patch("app.core.framework.PDFParser")
+    def test_parse_resume_parser_fails(self, mock_pdf_parser_class, mock_validate):
         """Test handling of parser failures."""
+        # Mock parser instance that raises exception
         mock_parser = Mock()
         mock_parser.parse.side_effect = ParsingError("Failed to parse PDF")
-        mock_get_parser.return_value = mock_parser
+        mock_pdf_parser_class.return_value = mock_parser
 
         extractors = {"name": MockExtractor("name", "Test")}
         framework = ResumeParserFramework(extractors)
@@ -152,21 +163,23 @@ class TestResumeParserFramework:
         with pytest.raises(ParsingError):
             framework.parse_resume(Path("/fake/resume.pdf"))
 
-    def test_parse_resume_with_string_path(self):
+    @patch("app.utils.validators.FileValidator.validate_file")
+    @patch("app.core.framework.PDFParser")
+    def test_parse_resume_with_string_path(self, mock_pdf_parser_class, mock_validate):
         """Test parsing with string path (should convert to Path)."""
-        with patch("app.core.framework.ParserFactory.get_parser") as mock_get_parser:
-            mock_parser = Mock()
-            mock_parser.parse.return_value = "Text"
-            mock_get_parser.return_value = mock_parser
+        # Mock parser instance
+        mock_parser = Mock()
+        mock_parser.parse.return_value = "Text"
+        mock_pdf_parser_class.return_value = mock_parser
 
-            extractors = {"name": MockExtractor("name", "Test")}
-            framework = ResumeParserFramework(extractors)
+        extractors = {"name": MockExtractor("name", "Test")}
+        framework = ResumeParserFramework(extractors)
 
-            result = framework.parse_resume("/fake/resume.pdf")
+        result = framework.parse_resume("/fake/resume.pdf")
 
-            assert isinstance(result, ResumeData)
-            # Verify Path was created
-            mock_get_parser.assert_called_once()
+        assert isinstance(result, ResumeData)
+        # Verify parser was instantiated
+        mock_pdf_parser_class.assert_called_once()
 
     def test_get_supported_formats(self):
         """Test getting supported file formats."""
