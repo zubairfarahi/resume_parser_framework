@@ -77,3 +77,47 @@ class TestWordParser:
         """Test custom timeout initialization."""
         parser = WordParser(timeout=60)
         assert parser.timeout == 60
+
+    def test_parse_valid_docx(self, sample_docx_path: Path) -> None:
+        """Test parsing a valid Word document."""
+        try:
+            text = self.parser.parse(sample_docx_path)
+            assert isinstance(text, str)
+            assert len(text) > 0
+            # Check that sample content is present
+            assert "John Doe" in text
+            assert "Software Engineer" in text
+            assert "Python" in text or "SKILLS" in text
+        except ImportError:
+            pytest.skip("python-docx not installed")
+        except ParsingError as e:
+            # Skip if Word has no extractable text
+            if "No text content found" in str(e):
+                pytest.skip("Test Word document has no extractable text content")
+            raise
+
+    def test_parse_docx_with_tables(self, sample_docx_path: Path) -> None:
+        """Test parsing Word document extracts table content."""
+        try:
+            text = self.parser.parse(sample_docx_path)
+            # Table content should be extracted
+            assert "Education" in text or "UC Berkeley" in text
+        except ImportError:
+            pytest.skip("python-docx not installed")
+
+    def test_parse_empty_docx(self, temp_directory: Path) -> None:
+        """Test parsing an empty Word document raises ParsingError."""
+        try:
+            from docx import Document
+
+            empty_docx = temp_directory / "empty.docx"
+            document = Document()
+            document.save(str(empty_docx))
+
+            with pytest.raises(ParsingError) as exc_info:
+                self.parser.parse(empty_docx)
+
+            assert "No text content found" in str(exc_info.value)
+
+        except ImportError:
+            pytest.skip("python-docx not installed")

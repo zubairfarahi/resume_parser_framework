@@ -215,6 +215,48 @@ startxref
     return pdf_path
 
 
+@pytest.fixture
+def sample_docx_path(temp_directory: Path) -> Path:
+    """Create a sample Word document for testing.
+
+    Args:
+        temp_directory: Temporary directory fixture
+
+    Returns:
+        Path to sample Word document
+    """
+    try:
+        from docx import Document
+
+        docx_path = temp_directory / "sample_resume.docx"
+
+        # Create a Word document with sample content
+        document = Document()
+        document.add_paragraph("John Doe")
+        document.add_paragraph("Software Engineer")
+        document.add_paragraph("Email: john.doe@example.com")
+        document.add_paragraph("Phone: +1-555-123-4567")
+        document.add_paragraph("")
+        document.add_paragraph("SUMMARY")
+        document.add_paragraph("Experienced software engineer with 5+ years in Python development.")
+        document.add_paragraph("")
+        document.add_paragraph("SKILLS")
+        document.add_paragraph("Python, FastAPI, Docker, PostgreSQL")
+
+        # Add a table
+        table = document.add_table(rows=2, cols=2)
+        table.rows[0].cells[0].text = "Education"
+        table.rows[0].cells[1].text = "UC Berkeley"
+        table.rows[1].cells[0].text = "Degree"
+        table.rows[1].cells[1].text = "BS Computer Science"
+
+        document.save(str(docx_path))
+        return docx_path
+
+    except ImportError:
+        pytest.skip("python-docx not installed")
+
+
 @pytest.fixture(autouse=True)
 def setup_test_environment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Set up test environment for all tests.
