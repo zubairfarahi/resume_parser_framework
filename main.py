@@ -195,15 +195,18 @@ async def parse_resume(file: UploadFile = File(...)) -> JSONResponse:
         resume_data = framework.parse_resume(tmp_file_path)
 
         # Convert to dict for JSON response
+        # Use model_dump() to convert Pydantic models to dicts (including nested Education/WorkExperience)
+        resume_dict = resume_data.model_dump()
+
         result = {
             "success": True,
             "data": {
-                "name": resume_data.name,
-                "email": resume_data.email,
-                "phone": resume_data.phone,
-                "skills": resume_data.skills,
-                "education": resume_data.education,
-                "experience": resume_data.experience,
+                "name": resume_dict["name"],
+                "email": resume_dict["email"],
+                "phone": resume_dict["phone"],
+                "skills": resume_dict["skills"],
+                "education": resume_dict["education"],  # Now properly serialized
+                "experience": resume_dict["experience"],  # Now properly serialized
             },
             "filename": file.filename,
         }
