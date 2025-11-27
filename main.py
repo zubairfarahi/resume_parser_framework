@@ -7,6 +7,7 @@ import tempfile
 from pathlib import Path
 from typing import Dict, Any
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -15,6 +16,9 @@ from app.config.logging_config import get_logger, setup_logging
 from app.core.extractors import EmailExtractor, NameExtractor, SkillsExtractor
 from app.core.framework import ResumeParserFramework
 from app.exceptions.exceptions import ParsingError, ValidationError
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Setup logging
 setup_logging()

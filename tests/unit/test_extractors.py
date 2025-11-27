@@ -103,7 +103,7 @@ class TestSkillsExtractor:
 
         try:
             extractor = SkillsExtractor()
-            assert extractor.model_name == "gpt-3.5-turbo"
+            assert extractor.model_name == "gpt-4o-mini"
             assert extractor.temperature == 0.0
         except ImportError:
             pytest.skip("openai package not installed")

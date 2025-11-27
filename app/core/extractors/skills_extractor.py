@@ -33,7 +33,7 @@ class SkillsExtractor(FieldExtractor):
 
     Environment Variables:
         OPENAI_API_KEY: OpenAI API key (required)
-        OPENAI_MODEL: Model name (optional, default: gpt-3.5-turbo)
+        OPENAI_MODEL: Model name (optional, default: gpt-4o-mini)
         OPENAI_TEMPERATURE: Temperature for generation (optional, default: 0.0)
     """
 
@@ -42,14 +42,14 @@ class SkillsExtractor(FieldExtractor):
 
         Args:
             config: Optional configuration dictionary with keys:
-                - model: Model name (default: from env or 'gpt-3.5-turbo')
+                - model: Model name (default: from env or 'gpt-4o-mini')
                 - temperature: Temperature for generation (default: from env or 0.0)
                 - max_tokens: Maximum tokens for response (default: 500)
         """
         super().__init__(config)
 
         # Get configuration from env or config
-        self.model_name = self.config.get("model") or os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
+        self.model_name = self.config.get("model") or os.getenv("OPENAI_MODEL", "gpt-4o-mini")
         self.temperature = float(
             self.config.get("temperature") or os.getenv("OPENAI_TEMPERATURE", "0.0")
         )
