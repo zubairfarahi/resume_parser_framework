@@ -103,7 +103,8 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["S101", "T20"]  # Allow assert and print in tests
+"tests/**/*.py" = ["S101", "T20", "B017", "PT011"]  # Allow assert, print, and broad exceptions in tests
+"examples/**/*.py" = ["T20"]  # Allow print in example scripts
 
 [tool.mypy]
 python_version = "3.10"

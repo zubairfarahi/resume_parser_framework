@@ -4,7 +4,6 @@ This module provides reusable fixtures for testing the resume parser framework.
 """
 
 from pathlib import Path
-from typing import Generator
 
 import pytest
 
@@ -13,18 +12,18 @@ from app.core.models.resume_data import Education, ResumeData, WorkExperience
 
 
 @pytest.fixture
-def temp_directory(tmp_path: Path) -> Generator[Path, None, None]:
+def temp_directory(tmp_path: Path) -> Path:
     """Provide a temporary directory for test files.
 
     Args:
         tmp_path: Pytest's temporary path fixture
 
-    Yields:
+    Returns:
         Path to temporary directory
     """
     test_dir = tmp_path / "test_files"
     test_dir.mkdir(exist_ok=True)
-    yield test_dir
+    return test_dir
 
 
 @pytest.fixture

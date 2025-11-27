@@ -2,8 +2,6 @@
 
 from unittest.mock import Mock
 
-import pytest
-
 from app.core.extractors.base import FieldExtractor
 from app.core.models.resume_data import ResumeData
 from app.core.resume_extractor import ResumeExtractor

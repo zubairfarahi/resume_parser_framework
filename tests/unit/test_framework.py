@@ -189,4 +189,4 @@ class TestResumeParserFramework:
         # For now, just verify the method exists and returns something
         if hasattr(framework, "get_supported_formats"):
             formats = framework.get_supported_formats()
-            assert isinstance(formats, (list, set, tuple))
+            assert isinstance(formats, list | set | tuple)
